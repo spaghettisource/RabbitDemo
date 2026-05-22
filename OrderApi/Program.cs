@@ -1,4 +1,6 @@
 using OrderApi.Services;
+using OrderWorker;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +8,9 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.Configure<RabbitMqOptions>(
+    builder.Configuration.GetSection("RabbitMq"));
 
 builder.Services.AddScoped<IMessagePublisher,
     RabbitMqMessagePublisher>();

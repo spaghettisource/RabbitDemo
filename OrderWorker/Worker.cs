@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 using RabbitDemo.Contracts.Messages;
 using RabbitDemo.Data.Repositories;
 using RabbitMQ.Client;
@@ -9,7 +10,8 @@ namespace OrderWorker;
 
 public class Worker(
     ILogger<Worker> logger,
-    ITicketRepository repository)
+    ITicketRepository repository,
+    IOptions<RabbitMqOptions> rabbitOptions)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(
@@ -17,7 +19,7 @@ public class Worker(
     {
         var factory = new ConnectionFactory
         {
-            HostName = "localhost"
+            HostName = rabbitOptions.Value.Host
         };
 
         var connection =

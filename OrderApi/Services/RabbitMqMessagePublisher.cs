@@ -1,17 +1,21 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using Microsoft.Extensions.Options;
+using OrderWorker;
 using RabbitDemo.Contracts.Messages;
 using RabbitMQ.Client;
+using System.Text;
+using System.Text.Json;
 
 namespace OrderApi.Services;
 
-public class RabbitMqMessagePublisher : IMessagePublisher
+public class RabbitMqMessagePublisher(
+    IOptions<RabbitMqOptions> rabbitOptions)
+    : IMessagePublisher
 {
     public async Task PublishAsync(TicketCreated ticket)
     {
         var factory = new ConnectionFactory
         {
-            HostName = "localhost"
+            HostName = rabbitOptions.Value.Host
         };
 
         await using var connection =

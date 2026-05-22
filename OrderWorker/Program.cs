@@ -3,6 +3,9 @@ using RabbitDemo.Data.Repositories;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+builder.Services.Configure<RabbitMqOptions>(
+    builder.Configuration.GetSection("RabbitMq"));
+
 var connectionString =
     builder.Configuration.GetConnectionString("TicketDb")
     ?? throw new InvalidOperationException(
