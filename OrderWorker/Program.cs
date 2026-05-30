@@ -1,4 +1,5 @@
 using OrderWorker;
+using RabbitDemo.Contracts.Configuration;
 using RabbitDemo.Data.Repositories;
 
 var builder = Host.CreateApplicationBuilder(args);

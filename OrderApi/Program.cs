@@ -1,6 +1,8 @@
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using OrderApi.Services;
-using OrderWorker;
-
+using RabbitDemo.Contracts.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,26 @@ builder.Services.Configure<RabbitMqOptions>(
 
 builder.Services.AddScoped<IMessagePublisher,
     RabbitMqMessagePublisher>();
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing =>
+    {
+        tracing
+            .SetResourceBuilder(
+                ResourceBuilder.CreateDefault()
+                    .AddService("OrderApi"))
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddConsoleExporter()
+.AddOtlpExporter(options =>
+{
+    options.Endpoint =
+        new Uri("http://tempo:4318");
+
+    options.Protocol =
+        OtlpExportProtocol.HttpProtobuf;
+});
+    });
 
 var app = builder.Build();
 

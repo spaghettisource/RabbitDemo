@@ -15,6 +15,23 @@ services:
     ports:
       - "5434:5432"
 
+  tempo:
+    image: grafana/tempo:2.7.1
+    command: ["-config.file=/etc/tempo.yml"]
+    volumes:
+      - ./tempo.yml:/etc/tempo.yml
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+
+  grafana:
+    image: grafana/grafana:11.6.0
+    ports:
+      - "3000:3000"
+    depends_on:
+      - tempo
+
   orderapi:
     build:
       context: .
@@ -26,6 +43,7 @@ services:
       ASPNETCORE_URLS: http://+:8080
     depends_on:
       - rabbitmq
+      - tempo
 
   orderworker:
     build:

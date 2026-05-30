@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
+using RabbitDemo.Contracts.Configuration;
 using RabbitDemo.Contracts.Messages;
 using RabbitDemo.Data.Repositories;
 using RabbitMQ.Client;

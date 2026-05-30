@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
-using OrderWorker;
+using RabbitDemo.Contracts.Configuration;
 using RabbitDemo.Contracts.Messages;
 using RabbitMQ.Client;
 using System.Text;

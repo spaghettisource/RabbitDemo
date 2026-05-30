@@ -1,4 +1,4 @@
-﻿namespace OrderWorker;
+﻿namespace RabbitDemo.Contracts.Configuration;
 
 public class RabbitMqOptions
 {
