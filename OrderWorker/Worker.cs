@@ -25,8 +25,36 @@ public class Worker(
             HostName = rabbitOptions.Value.Host
         };
 
-        var connection =
-            await factory.CreateConnectionAsync(stoppingToken);
+        IConnection? connection = null;
+
+        while (connection is null &&
+               !stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                connection =
+                    await factory.CreateConnectionAsync(
+                        stoppingToken);
+
+                logger.LogInformation(
+                    "Connected to RabbitMQ");
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(
+                    ex,
+                    "RabbitMQ not ready. Retrying in 5 seconds...");
+
+                await Task.Delay(
+                    TimeSpan.FromSeconds(5),
+                    stoppingToken);
+            }
+        }
+
+        if (connection is null)
+        {
+            return;
+        }
 
         var channel =
             await connection.CreateChannelAsync(
