@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
@@ -50,11 +51,35 @@ public class Worker(
                 var ticket =
                     JsonSerializer.Deserialize<TicketCreated>(json);
 
+                string? traceParent = null;
+
+                if (args.BasicProperties.Headers is not null &&
+                    args.BasicProperties.Headers.TryGetValue(
+                        "traceparent",
+                        out var traceParentBytes))
+                {
+                    traceParent =
+                        Encoding.UTF8.GetString(
+                            (byte[])traceParentBytes);
+                }
+
+                ActivityContext parentContext = default;
+
+                if (!string.IsNullOrEmpty(traceParent))
+                {
+                    ActivityContext.TryParse(
+                        traceParent,
+                        null,
+                        out parentContext);
+                }
+
                 if (ticket is not null)
                 {
                     using var activity =
                         WorkerActivitySource.Source.StartActivity(
-                            "Process Ticket");
+                            "Process Ticket",
+                            ActivityKind.Consumer,
+                            parentContext);
 
                     activity?.SetTag(
                         "ticket.event_id",
