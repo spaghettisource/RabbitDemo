@@ -16,6 +16,9 @@
     <PackageReference Include="RabbitMQ.Client" Version="7.2.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="10.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.8" />
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>

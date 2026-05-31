@@ -3,13 +3,31 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OrderApi.Services;
 using RabbitDemo.Contracts.Configuration;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Trace);
 
 builder.Services.AddControllers();
+
+builder.Services.AddSingleton<IConnection>(_ =>
+{
+    var factory = new ConnectionFactory
+    {
+        HostName =
+            builder.Configuration["RabbitMq:Host"]
+    };
+
+    return factory.CreateConnectionAsync()
+        .GetAwaiter()
+        .GetResult();
+});
+
+builder.Services.AddHealthChecks()
+    .AddRabbitMQ();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -30,14 +48,14 @@ builder.Services.AddOpenTelemetry()
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             .AddConsoleExporter()
-.AddOtlpExporter(options =>
-{
-    options.Endpoint =
-        new Uri("http://tempo:4318/v1/traces");
+            .AddOtlpExporter(options =>
+            {
+                options.Endpoint =
+                    new Uri("http://tempo:4318/v1/traces");
 
-    options.Protocol =
-        OtlpExportProtocol.HttpProtobuf;
-});
+                options.Protocol =
+                    OtlpExportProtocol.HttpProtobuf;
+            });
     });
 
 var app = builder.Build();
@@ -53,5 +71,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();
