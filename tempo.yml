@@ -10,8 +10,25 @@ distributor:
         http:
           endpoint: 0.0.0.0:4318
 
+ingester:
+  max_block_duration: 5m
+
+compactor:
+  compaction:
+    block_retention: 24h
+
 storage:
   trace:
     backend: local
+
+    wal:
+      path: /tmp/tempo/wal
+
     local:
-      path: /tmp/tempo/traces
+      path: /tmp/tempo/blocks
+
+overrides:
+  defaults:
+    ingestion:
+      rate_limit_bytes: 15000000
+      burst_size_bytes: 20000000

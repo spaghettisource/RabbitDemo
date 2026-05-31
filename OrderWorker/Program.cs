@@ -1,3 +1,6 @@
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using OrderWorker;
 using RabbitDemo.Contracts.Configuration;
 using RabbitDemo.Data.Repositories;
@@ -14,6 +17,25 @@ var connectionString =
 
 builder.Services.AddSingleton<ITicketRepository>(
     _ => new TicketRepository(connectionString));
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing =>
+    {
+        tracing
+            .SetResourceBuilder(
+                ResourceBuilder.CreateDefault()
+                    .AddService("OrderWorker"))
+            .AddSource("OrderWorker")
+            .AddConsoleExporter()
+            .AddOtlpExporter(options =>
+            {
+                options.Endpoint =
+                    new Uri("http://tempo:4318/v1/traces");
+
+                options.Protocol =
+                    OtlpExportProtocol.HttpProtobuf;
+            });
+    });
 
 builder.Services.AddHostedService<Worker>();
 

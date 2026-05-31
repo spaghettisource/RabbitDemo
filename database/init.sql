@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS tickets
+(
+    id SERIAL PRIMARY KEY,
+    event_id INT NOT NULL,
+    customer TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

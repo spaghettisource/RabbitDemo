@@ -5,6 +5,9 @@ using OrderApi.Services;
 using RabbitDemo.Contracts.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Trace);
 
 builder.Services.AddControllers();
 
@@ -30,7 +33,7 @@ builder.Services.AddOpenTelemetry()
 .AddOtlpExporter(options =>
 {
     options.Endpoint =
-        new Uri("http://tempo:4318");
+        new Uri("http://tempo:4318/v1/traces");
 
     options.Protocol =
         OtlpExportProtocol.HttpProtobuf;

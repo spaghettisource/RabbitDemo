@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
+using OrderWorker.Telemetry;
 using RabbitDemo.Contracts.Configuration;
 using RabbitDemo.Contracts.Messages;
 using RabbitDemo.Data.Repositories;
@@ -51,6 +52,18 @@ public class Worker(
 
                 if (ticket is not null)
                 {
+                    using var activity =
+                        WorkerActivitySource.Source.StartActivity(
+                            "Process Ticket");
+
+                    activity?.SetTag(
+                        "ticket.event_id",
+                        ticket.EventId);
+
+                    activity?.SetTag(
+                        "ticket.customer",
+                        ticket.Customer);
+
                     await repository.SaveAsync(
                         ticket,
                         stoppingToken);
