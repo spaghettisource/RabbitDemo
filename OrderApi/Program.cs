@@ -1,4 +1,5 @@
 using OpenTelemetry.Exporter;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OrderApi.Services;
@@ -39,12 +40,11 @@ builder.Services.AddScoped<IMessagePublisher,
     RabbitMqMessagePublisher>();
 
 builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource =>
+        resource.AddService("OrderApi"))
     .WithTracing(tracing =>
     {
         tracing
-            .SetResourceBuilder(
-                ResourceBuilder.CreateDefault()
-                    .AddService("OrderApi"))
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             .AddConsoleExporter()
@@ -56,6 +56,13 @@ builder.Services.AddOpenTelemetry()
                 options.Protocol =
                     OtlpExportProtocol.HttpProtobuf;
             });
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddPrometheusExporter();
     });
 
 var app = builder.Build();
@@ -73,5 +80,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHealthChecks("/health");
+
+app.MapPrometheusScrapingEndpoint();
 
 app.Run();
