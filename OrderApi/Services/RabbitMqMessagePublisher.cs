@@ -25,8 +25,22 @@ public class RabbitMqMessagePublisher(
         await using var channel =
             await connection.CreateChannelAsync();
 
+        var arguments =
+            new Dictionary<string, object?>
+            {
+                ["x-dead-letter-exchange"] = "",
+                ["x-dead-letter-routing-key"] = "ticket-orders-dlq"
+            };
+
         await channel.QueueDeclareAsync(
             queue: "ticket-orders",
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: arguments);
+
+        await channel.QueueDeclareAsync(
+            queue: "ticket-orders-dlq",
             durable: true,
             exclusive: false,
             autoDelete: false);

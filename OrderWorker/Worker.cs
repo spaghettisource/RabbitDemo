@@ -60,12 +60,25 @@ public class Worker(
             await connection.CreateChannelAsync(
                 cancellationToken: stoppingToken);
 
+        var arguments =
+            new Dictionary<string, object?>
+            {
+                ["x-dead-letter-exchange"] = "",
+                ["x-dead-letter-routing-key"] = "ticket-orders-dlq"
+            };
+
         await channel.QueueDeclareAsync(
             queue: "ticket-orders",
             durable: true,
             exclusive: false,
             autoDelete: false,
-            cancellationToken: stoppingToken);
+            arguments: arguments);
+
+        await channel.QueueDeclareAsync(
+            queue: "ticket-orders-dlq",
+            durable: true,
+            exclusive: false,
+            autoDelete: false);
 
         var consumer = new AsyncEventingBasicConsumer(channel);
 
