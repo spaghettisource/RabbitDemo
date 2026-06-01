@@ -66,10 +66,11 @@ services:
     environment:
       RabbitMq__Host: rabbitmq
       ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__TicketDb: Host=postgres;Port=5432;Database=ticketdemo;Username=apps;Password=appspwd
     depends_on:
       - rabbitmq
       - tempo
-
+    
   orderworker:
     build:
       context: .

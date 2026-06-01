@@ -4,6 +4,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OrderApi.Services;
 using RabbitDemo.Contracts.Configuration;
+using RabbitDemo.Data.Repositories;
 using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,14 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<RabbitMqOptions>(
     builder.Configuration.GetSection("RabbitMq"));
+
+var connectionString =
+    builder.Configuration.GetConnectionString("TicketDb")
+    ?? throw new InvalidOperationException(
+        "Connection string TicketDb not found.");
+
+builder.Services.AddSingleton<IOutboxRepository>(
+    _ => new OutboxRepository(connectionString));
 
 builder.Services.AddScoped<IMessagePublisher,
     RabbitMqMessagePublisher>();

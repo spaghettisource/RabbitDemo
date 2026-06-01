@@ -4,6 +4,7 @@ using OpenTelemetry.Trace;
 using OrderWorker;
 using RabbitDemo.Contracts.Configuration;
 using RabbitDemo.Data.Repositories;
+using RabbitMQ.Client;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -17,6 +18,22 @@ var connectionString =
 
 builder.Services.AddSingleton<ITicketRepository>(
     _ => new TicketRepository(connectionString));
+
+builder.Services.AddSingleton<IOutboxRepository>(
+    _ => new OutboxRepository(connectionString));
+
+builder.Services.AddSingleton<IConnection>(_ =>
+{
+    var factory = new ConnectionFactory
+    {
+        HostName =
+            builder.Configuration["RabbitMq:Host"]
+    };
+
+    return factory.CreateConnectionAsync()
+        .GetAwaiter()
+        .GetResult();
+});
 
 builder.Services.AddOpenTelemetry()
     .WithTracing(tracing =>
@@ -38,6 +55,7 @@ builder.Services.AddOpenTelemetry()
     });
 
 builder.Services.AddHostedService<Worker>();
+builder.Services.AddHostedService<OutboxPublisherWorker>();
 
 var host = builder.Build();
 

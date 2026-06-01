@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OrderApi.Services;
 using RabbitDemo.Contracts.Messages;
+using RabbitDemo.Data.Repositories;
 
 namespace OrderApi.Controllers;
 
@@ -8,22 +8,23 @@ namespace OrderApi.Controllers;
 [Route("api/[controller]")]
 public class TicketsController : ControllerBase
 {
-    private readonly IMessagePublisher _publisher;
+    private readonly IOutboxRepository _outboxRepository;
 
-    public TicketsController(IMessagePublisher publisher)
+    public TicketsController(
+        IOutboxRepository outboxRepository)
     {
-        _publisher = publisher;
+        _outboxRepository = outboxRepository;
     }
 
     [HttpPost]
     public async Task<IActionResult> Create(
         TicketCreated ticket)
     {
-        await _publisher.PublishAsync(ticket);
+        await _outboxRepository.SaveAsync(ticket);
 
         return Ok(new
         {
-            Message = "Ticket published"
+            Message = "Ticket saved to outbox"
         });
     }
 }
